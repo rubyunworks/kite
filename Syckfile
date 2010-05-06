@@ -1,0 +1,77 @@
+---
+box:
+  service: Box
+  active : true
+  types  : [gem, gz]
+  include: [bin, lib, meta, test, "[A-Z]*"]
+  exclude: [Syckfile]
+  master : false
+
+email:
+  service : Email
+  file    : ~
+  subject : ~
+  mailto  : ruby-talk@ruby-lang.org
+  from    : <%= ENV['EMAIL_ACCOUNT'] %>
+  server  : <%= ENV['EMAIL_SERVER'] %>
+  port    : <%= ENV['EMAIL_PORT'] %>
+  account : <%= ENV['EMAIL_ACCOUNT'] %>
+  domain  : <%= ENV['EMAIL_DOMAIN'] %>
+  login   : <%= ENV['EMAIL_LOGIN'] %>
+  secure  : <%= ENV['EMAIL_SECURE'] %>
+  active  : true
+
+grancher:
+  service: Grancher
+  active: true
+
+dnote:
+  service  : DNote
+  loadpath : ~
+  labels   : ~
+  output   : ~
+  active   : true
+
+ridoc:
+  service: RIDoc
+  include: ~
+  exclude: [Syckfile]
+  ignore : ~
+  active : true
+
+rdoc:
+  template: newfish
+  exclude: [Syckfile]
+  active: true  
+
+stats:
+  service  : Stats
+  title    : ~
+  loadpath : ~
+  exclude  : ~
+  output   : ~
+  active   : true
+
+testrb:
+  service  : Testrb
+  tests    : ~
+  exclude  : ~
+  loadpath : ~
+  requires : ~
+  live     : false   
+  active   : false
+
+vclog:
+  service  : VClog
+  format   : html   # xml, txt
+  layout   : rel    # gnu
+  typed    : false
+  output   : ~
+  active   : false
+
+syntax:
+  service  : Syntax
+  loadpath : ~
+  exclude  : ~
+  active   : false
+
