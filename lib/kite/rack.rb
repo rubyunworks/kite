@@ -1,7 +1,8 @@
 module Kite
 
+  # = Rack Server
   #
-  class RackServer
+  class Rack
 
     require 'rack'
     require 'digest'

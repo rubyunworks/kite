@@ -1,0 +1,9 @@
+= Kite
+
+"Go Fly a Kite"
+
+Kite is a tool for hosting static websites on the cloud.
+
+Currently S3 is the only supported backend cloud service,
+but other adapters can be easily added.
+

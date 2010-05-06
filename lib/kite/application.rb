@@ -32,7 +32,7 @@ module Kite
       @config = Config.new(root)
       @store  = S3.new(domain)
       @site   = Site.new(store, config)
-      @server = RackServer.new(site)
+      @server = Rack.new(site)
     end
 
     #
