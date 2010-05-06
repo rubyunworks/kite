@@ -9,13 +9,13 @@ but other adapters can be easily added.
 
 == NOTES
 
-* This sync code is not yet wired to the exectuable.
+This sync code is not yet wired to the exectuable.
 Currently the code shells out to the command line,
 so I have posponed this until it can be done via Ruby
 code. The sync procedure probably needs some work 
 in any case.
 
-* I have been able to sync a sample site via an IRB
+I have been able to sync a sample site via an IRB
 session , and the Sinatra-based server appears to
 serve the site just fine (though I have no doubt
 it will require some tweaking yet).
