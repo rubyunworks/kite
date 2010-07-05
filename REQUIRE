@@ -1,0 +1,5 @@
+production:
+  requires:
+    - sinatra
+    - aws-s3
+
