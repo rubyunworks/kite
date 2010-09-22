@@ -1,37 +1,47 @@
 module Kite
 
-  class Config
+  # Config is simply a hash with some convenience methods
+  # for Kite configuration.
+  class Config < Hash
 
     #
     DEFAULTS = {
-      'author' => ENV['USER'], # blog author
-      'title'  => Dir.pwd.split('/').last, # site title
-      #'root'   => "index",
-      'index'  => "index.html", # site index
-      'static' => "public",
-      'url'    => "http://127.0.0.1",
-      'cache'  => 28800, # cache duration (seconds)
-      'env'    => "development"
+      :author  => ENV['USER'], # site author
+      :title   => Dir.pwd.split('/').last, # site title
+      :root    => Dir.pwd,
+      :index   => "index.html", # site index
+      :static  => "public",
+      :url     => "http://127.0.0.1",
+      :cache   => 28800, # cache duration (seconds)
+      :mode    => "development"
     }
 
+    def self.file(file)
+      config = YAML.load(File.new(file))
+      new config
+    end
+
     #
-    def initialize(root)
-      @data = {}
-      @data['root'] = root.to_s
-      @data.update DEFAULTS
-      @data.update YAML.load(File.new(config_file)) if config_file
+    def initialize(config={})
+      update(DEFAULTS)
+      update(rekey(config))
     end
 
     #
     def method_missing(s, *a)
-      @data[s.to_s]
+      self[s.to_sym]
     end
 
-  private
+    private
 
     #
-    def config_file
-      @config_file ||= Dir[File.join(root, 'config.{yml,yaml}')].first
+    #def config_file
+    #  @config_file ||= Dir[File.join(root, 'config.{yml,yaml}')].first
+    #end
+
+
+    def rekey(hash)
+      hash.inject({}){ |h, (k,v)| h[k.to_sym] = v; h }
     end
 
   end

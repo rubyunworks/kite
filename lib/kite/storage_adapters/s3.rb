@@ -1,7 +1,6 @@
 module Kite
 
   require 'aws/s3'
-  require 'kite/kernel'
 
   # Amazon s3 interface
   class S3
@@ -17,11 +16,11 @@ module Kite
     attr_accessor :secret_key
 
     #
-    def initialize(bucket) #, config=nil, &block)
-      self.bucket = bucket
-      self.access_key = config['aws_access_key_id']     || ENV['AWS_ACCESS_KEY_ID']
-      self.secret_key = config['aws_secret_access_key'] || ENV['AWS_SECRET_ACCESS_KEY']
-      #object_set(config, &block)
+    # TODO: Use a generic name for `bucket` that will work across storage adapters.
+    def initialize(config={})
+      self.bucket     = config[:bucket] || config[:domain]
+      self.access_key = config[:aws_access_key_id]     || ENV['AWS_ACCESS_KEY_ID']
+      self.secret_key = config[:aws_secret_access_key] || ENV['AWS_SECRET_ACCESS_KEY']
       connect
     end
 

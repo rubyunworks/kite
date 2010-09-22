@@ -1,58 +1,106 @@
+require 'rack'
+require 'digest'
+
 module Kite
 
-  # = Rack Server
+  # = Rack Middleware
   #
   class Rack
 
-    require 'rack'
-    require 'digest'
-
-    # Site controller.
-    attr :site
+    #
+    DEFAULTS = {
+      :author => ENV['USER'], # site author
+      :title  => Dir.pwd.split('/').last, # site title
+      :root   => Dir.pwd,
+      :index  => "index.html", # site index
+      :static => "public",
+      :url    => "http://127.0.0.1",
+      :cache  => 28800, # cache duration (seconds)
+      :env    => "development"
+    }
 
     # Configuration.
     attr :config
- 
+
     #
-    def initialize(site, config={}, &blk)
-      @site   = site
-      @config = config.is_a?(Config) ? config : Config.new(config)
-      @config.instance_eval(&blk) if block_given?
+    def initialize(app, config={})
+      @app    = app
+      @config = DEFAULTS.merge(config)
     end
  
     #
     def call(env)
-      @request = Rack::Request.new(env)
+      @request  = Rack::Request.new(env)
       @response = Rack::Response.new
  
-      return [400, {}, []] unless @request.get?
+      #return [400, {}, []] unless @request.get?
+      return @app.call(env) unless @request.get? # or post?
  
       route = @request.path_info.sub(/^\//, '')
 
-      response = site.go(route)
+      response = go(route)
 
-      @response.body = [response[:body]]
-      @response['Content-Length'] = response[:body].length.to_s unless response[:body].empty?
-      @response['Content-Type'] = Rack::Mime.mime_type(".#{response[:type]}")
- 
-      # Set http cache headers
-      @response['Cache-Control'] = if config.env == 'production'
-        "public, max-age=#{config.cache}"
+      if response
+        @response.body = [response[:body]]
+        @response['Content-Length'] = response[:body].length.to_s unless response[:body].empty?
+        @response['Content-Type'] = Rack::Mime.mime_type(".#{response[:type]}")
+   
+        # Set http cache headers
+        @response['Cache-Control'] = if config[:env] == 'production'
+          "public, max-age=#{config[:cache]}"
+        else
+          "no-cache, must-revalidate"
+        end
+   
+        @response['Etag'] = Digest::SHA1.hexdigest(response[:body])
+   
+        @response.status = response[:status]
+        @response.finish
       else
-        "no-cache, must-revalidate"
+        @app.call(env)
       end
- 
-      @response['Etag'] = Digest::SHA1.hexdigest(response[:body])
- 
-      @response.status = response[:status]
-      @response.finish
     end
 
     #
-    def run
-      system('rackup')
-      #app.run!
+    def go(route)
+      route = config[:index] if route == ""
+      type  = File.extname(route).sub(/^\./, '')
+      if (local + route).file?
+        body   = (local + route).read
+        status = nil
+      else
+        body   = store[route].to_s
+        status = nil
+      end
+      #return :body => body || "", :type => type, :status => status || 200
+    rescue Errno::ENOENT => e
+      return nil
+      #return :body => http(404).first, :type => :html, :status => 404
+    else
+      return :body => body || "", :type => type, :status => status || 200
     end
+
+    def root
+      @root ||= Pathname.new(config[:root])
+    end
+
+    def local
+      @local ||= root + (config[:static]
+    end
+
+    def store
+      @store ||= storage_adpater.new(config)
+    end
+
+    def storage_adapter
+      @storage_adapter ||= lookup_storage_adapter
+    end
+
+    #
+    #def run
+    #  system('rackup')
+    #  #app.run!
+    #end
 
     #
     #def app
@@ -63,6 +111,13 @@ module Kite
     #    run server
     #  end.to_app
     #end
+
+  private
+
+    def lookup_storage_adapter
+      name = config[:store].upcase
+      Kite.const_get(name)
+    end
 
   end
 
