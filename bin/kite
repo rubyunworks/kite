@@ -1,35 +1,18 @@
 #!/usr/bin/env ruby
 
-require 'optparse'
-
-cmd = :serve
-
-opt = OptionParser.new do |opt|
-  opt.banner = "kite [command-option] [*config-options]"
-
-  opt.separator "Command Options (pick one):"
-
-  opt.on("--serve", "lauch webserver instance") do
-    cmd = :serve
-  end
-
-  opt.on("--sync", "sync site files to s3 bucket") do
-    cmd = :sync
-  end
-end
-
-opt.parse!
+cmd = ARGV.unshift || 'serve'
 
 case cmd
-when :serve
+when 'serve'
   if File.exist?("condig.ru")
-    system("ruby config.ru")  # ruby('config.ru')
+    system("ruby config.ru") # ruby('config.ru')
   else
-    require 'kite'
-    app = Kite::Application.new(Dir.pwd)
-    app.run
+    require 'kite/server'
+    Kite::Server.start
   end
-when :sync
-
+when 'sync'
+  abort "sync not supported yet"
+else
+  abort "unknown command -- #{cmd}"
 end
 
