@@ -1,4 +1,9 @@
 --- 
 title  : Kite
-authors: Thomas Sawyer
 
+requires:
+  - sinatra
+  - aws-s3
+
+authors:
+  - Thomas Sawyer
